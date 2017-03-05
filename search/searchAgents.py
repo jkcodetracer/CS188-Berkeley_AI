@@ -391,6 +391,7 @@ def cornersHeuristic(state, problem):
         if not visitedCorners[i]:
             dx, dy = corners[i]
             #total += ((x-dx)**2 + (y-dy)**2)**0.5
+            # Manhattan is better than Euclidean
             total += abs(x-dx) + abs(y-dy)
 
     return total # Default to trivial solution
