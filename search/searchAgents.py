@@ -290,26 +290,27 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
 
 
+
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        return (self.startingPosition, [])
+        visitedCorners = (False,False,False,False)
+        return (self.startingPosition, visitedCorners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        current = state[0]
         visitedCorners = state[1]
-        if current in self.corners:
-            if current not in visitedCorners:
-                visitedCorners.append(current)
-            return len(visitedCorners) == 4
-        return False
+        for value in visitedCorners:
+            if not value:
+                return False
+
+        return True
 
     def getSuccessors(self, state):
         """
@@ -341,9 +342,11 @@ class CornersProblem(search.SearchProblem):
                 successorVisitedCorners = list(visitedCorners)
                 next_node = (nextx, nexty)
                 if next_node in self.corners:
-                    if next_node not in successorVisitedCorners:
-                        successorVisitedCorners.append(next_node)
-                succ = ((next_node, successorVisitedCorners), action, 1)
+                    for i in range(len(visitedCorners)):
+                        if next_node == self.corners[i]:
+                            successorVisitedCorners[i] = True
+
+                succ = ((next_node, tuple(successorVisitedCorners)), action, 1)
                 successors.append(succ)
 
         self._expanded += 1 # DO NOT CHANGE
@@ -381,8 +384,15 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    total = 0
+    x, y = state[0]
+    visitedCorners = state[1]
+    for i in range(len(visitedCorners)):
+        if not visitedCorners[i]:
+            dx, dy = corners[i]
+            total += ((x-dx)**2 + (y-dy)**2)**0.5
 
-    return 0 # Default to trivial solution
+    return total # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

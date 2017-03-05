@@ -193,6 +193,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     from game import Directions
     PQ = util.PriorityQueue()
     start = tuple(problem.getStartState())
+    print start
     PQ.push(start, 0)
     came_from = {}
     cost_so_far = {}
