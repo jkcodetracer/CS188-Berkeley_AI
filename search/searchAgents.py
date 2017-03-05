@@ -385,14 +385,19 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     total = 0
-    x, y = state[0]
+    current = state[0]
+    unvisitedCorners = []
     visitedCorners = state[1]
     for i in range(len(visitedCorners)):
         if not visitedCorners[i]:
-            dx, dy = corners[i]
-            #total += ((x-dx)**2 + (y-dy)**2)**0.5
-            # Manhattan is better than Euclidean
-            total += abs(x-dx) + abs(y-dy)
+            unvisitedCorners.append(corners[i])
+
+    # in this way, is slower than sum manhattanDistance(current, corner)
+    while len(unvisitedCorners) > 0:
+        distance, corner = min([(util.manhattanDistance(current, corner), corner) for corner in unvisitedCorners])
+        current = corner
+        total += distance
+        unvisitedCorners.remove(corner)
 
     return total # Default to trivial solution
 
