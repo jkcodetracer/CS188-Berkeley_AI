@@ -130,6 +130,7 @@ def breadthFirstSearch(problem):
         current = tup[0]
         path = tup[1]
         if problem.isGoalState(current):
+            print path
             return path
 
         succesors = problem.getSuccessors(current)
