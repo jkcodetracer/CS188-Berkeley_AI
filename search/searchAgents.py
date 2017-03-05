@@ -390,7 +390,8 @@ def cornersHeuristic(state, problem):
     for i in range(len(visitedCorners)):
         if not visitedCorners[i]:
             dx, dy = corners[i]
-            total += ((x-dx)**2 + (y-dy)**2)**0.5
+            #total += ((x-dx)**2 + (y-dy)**2)**0.5
+            total += abs(x-dx) + abs(y-dy)
 
     return total # Default to trivial solution
 
