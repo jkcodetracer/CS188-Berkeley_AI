@@ -147,7 +147,28 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    PQ = util.PriorityQueue()
+    closed = []
+    v = [problem.getStartState(), []]
+    PQ.push(v, 0)
+    while not PQ.isEmpty():
+        tup = PQ.pop()
+        current = tup[0]
+        path = tup[1]
+        if problem.isGoalState(current):
+            return path
+        succesors = problem.getSuccessors(current)
+        for node in succesors:
+            tmppath = list(path)
+            coord = node[0]
+            nextstep = node[1]
+            weight = node[2]
+
+            if not coord in closed:
+                closed.append(coord)
+                tmppath.append(nextstep)
+                PQ.push((coord, tmppath), weight)
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -156,12 +177,49 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+def aStarPath(came_from, current_node, start):
+    if start == current_node:
+        return []
+    if current_node in came_from:
+        path = aStarPath(came_from, came_from[current_node][0], start)
+        return path + [came_from[current_node][1]]
+    else:
+        return [came_from[current_node][1]]
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from game import Directions
+    PQ = util.PriorityQueue()
+    start = tuple(problem.getStartState())
+    PQ.push(start, 0)
+    came_from = {}
+    cost_so_far = {}
 
+    came_from[start] = [start, Directions.STOP]
+    cost_so_far[start] = 0
 
+    while not PQ.isEmpty():
+        current = PQ.pop()
+        if problem.isGoalState(current):
+            path = aStarPath(came_from, current, start)
+            print path
+            return path
+
+        succesors = problem.getSuccessors(current)
+        for node in succesors:
+            coord = tuple(node[0])
+            move = node[1]
+            weight = node[2]
+            new_cost = cost_so_far[current] + weight
+            if coord not in cost_so_far or \
+                new_cost < cost_so_far[coord]:
+                cost_so_far[coord] = new_cost
+                new_cost = new_cost + heuristic(coord, problem)
+                came_from[coord] = (current, move)
+                PQ.push(coord, new_cost)
+
+    return []
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
