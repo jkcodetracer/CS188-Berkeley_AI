@@ -385,19 +385,14 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     total = 0
-    current = state[0]
-    unvisitedCorners = []
+    x, y = state[0]
     visitedCorners = state[1]
     for i in range(len(visitedCorners)):
         if not visitedCorners[i]:
-            unvisitedCorners.append(corners[i])
-
-    # in this way, is slower than sum manhattanDistance(current, corner)
-    while len(unvisitedCorners) > 0:
-        distance, corner = min([(util.manhattanDistance(current, corner), corner) for corner in unvisitedCorners])
-        current = corner
-        total += distance
-        unvisitedCorners.remove(corner)
+            dx,dy = corners[i]
+            #total += ((x-dx)**2 + (y-dy)**2)**0.5
+            # Manhattan is better than Euclidean
+            total += abs(x-dx) + abs(y-dy)
 
     return total # Default to trivial solution
 
@@ -492,8 +487,41 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
+    """
     "*** YOUR CODE HERE ***"
-    return 0
+    total = 0
+    foodcoords = foodGrid.asList()
+    for foodcoord in foodcoords:
+        total += util.manhattanDistance(position, foodcoord)*5
+    """
+    """
+    total = 0
+    foodcoords = foodGrid.asList()
+    lenth = len(foodcoords)
+    while len(foodcoords) > 0:
+        closestNode = findClosest(position, foodcoords)
+        total += util.manhattanDistance(position, closestNode)
+        position = closestNode
+        foodcoords.remove(closestNode)
+    """
+    foodcoords = foodGrid.asList()
+    lenth = len(foodcoords)
+    # THis is the best! always!
+    return lenth * (problem.walls.width + problem.walls.height)/2
+
+def findClosest(position, foodcoords):
+    maxcost = 9999999
+    distCoord = (0, 0)
+
+    for dest in foodcoords:
+        dist = util.manhattanDistance(position, dest)
+        if maxcost > dist:
+            maxcost = dist
+            distCoord = dest
+
+    return distCoord
+
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"

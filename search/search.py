@@ -214,6 +214,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             move = node[1]
             weight = node[2]
             new_cost = cost_so_far[current] + weight
+            #TODO !!! if the heuristic is consistency, this check is unessesary
             if coord not in cost_so_far or \
                 new_cost < cost_so_far[coord]:
                 cost_so_far[coord] = new_cost
