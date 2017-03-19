@@ -384,17 +384,20 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    total = 0
-    x, y = state[0]
-    visitedCorners = state[1]
-    for i in range(len(visitedCorners)):
-        if not visitedCorners[i]:
-            dx,dy = corners[i]
-            #total += ((x-dx)**2 + (y-dy)**2)**0.5
-            # Manhattan is better than Euclidean
-            total += abs(x-dx) + abs(y-dy)
+    currentLocation = state[0]
+    goals = []  # goals is a list of unvisited goals.
+    for i in range(len(corners)):
+        if not state[1][i]:  # state of [1][i] = False if the goal has not been visited
+            goals.append(corners[i])
 
-    return total # Default to trivial solution
+    accumulator = 0
+    while len(goals) != 0:
+        j = findClosestCornerMahattan(currentLocation, goals, problem)
+        accumulator += util.manhattanDistance(currentLocation, goals[j])
+        currentLocation = goals[j]  # move the current location to goal [j]
+        goals.remove(goals[j])  # remove goal[j] from the list of unvisited goals
+
+    return accumulator
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -458,6 +461,26 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+def findClosestCornerMahattan(cur, corners, problem):
+    minDistIndex = -1
+    minDist = -1
+    for i in range(len(corners)):
+        dist = util.manhattanDistance(cur, corners[i])
+        if dist!= 0 and (minDist == -1 or minDist >= dist):
+            minDist = dist
+            minDistIndex = i
+    return minDistIndex
+
+def findClosestCorner(cur, corners, problem):
+    minDistIndex = -1
+    minDist = -1
+    for i in range(len(corners)):
+        dist = mazeDistance(cur, corners[i], problem.startingGameState)
+        if dist!= 0 and (minDist == -1 or minDist >= dist):
+            minDist = dist
+            minDistIndex = i
+    return minDistIndex
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -494,20 +517,27 @@ def foodHeuristic(state, problem):
     for foodcoord in foodcoords:
         total += util.manhattanDistance(position, foodcoord)*5
     """
-    """
-    total = 0
+
+
     foodcoords = foodGrid.asList()
-    lenth = len(foodcoords)
-    while len(foodcoords) > 0:
-        closestNode = findClosest(position, foodcoords)
-        total += util.manhattanDistance(position, closestNode)
-        position = closestNode
-        foodcoords.remove(closestNode)
-    """
-    foodcoords = foodGrid.asList()
-    lenth = len(foodcoords)
-    # THis is the best! always!
-    return lenth * (problem.walls.width + problem.walls.height)/2
+    currentLocation = position  # pacman location
+
+    goals = []  # goals is a list of unvisited goals.
+    for i in range(len(foodcoords)):
+        goals.append(foodcoords[i])
+
+    accumulator = 0
+    largestDist = 0
+    for i in range(len(goals)):
+        j = findClosestCorner(currentLocation, goals, problem)
+        distance = mazeDistance(currentLocation, goals[j], problem.startingGameState)
+        accumulator += distance
+        currentLocation = goals[j]  # move the current location to goal [j]
+        if i != 0 and (largestDist == 0 or largestDist > distance):
+            largestDist = distance
+
+    accumulator = accumulator - largestDist
+    return accumulator
 
 def findClosest(position, foodcoords):
     maxcost = 9999999
@@ -552,7 +582,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -588,7 +618,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foodlist = self.food.asList()
+        if state in foodlist:
+            return True
+        return False
 
 def mazeDistance(point1, point2, gameState):
     """

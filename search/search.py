@@ -72,6 +72,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,13 +88,6 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    from game import Directions
-    s = Directions.STOP
-
-    print "St3rt:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-
     closed = []
     S = util.Stack()
     v = [problem.getStartState(),[]]
@@ -125,12 +119,12 @@ def breadthFirstSearch(problem):
     closed = []
     v = [problem.getStartState(), []]
     Q.push(v)
+    closed.append(problem.getStartState())
     while not Q.isEmpty():
         tup = Q.pop()
         current = tup[0]
         path = tup[1]
         if problem.isGoalState(current):
-            print path
             return path
 
         succesors = problem.getSuccessors(current)
@@ -148,27 +142,33 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    cost_so_far = {}
+    come_from = {}
     PQ = util.PriorityQueue()
-    closed = []
-    v = [problem.getStartState(), []]
+    v = problem.getStartState()
     PQ.push(v, 0)
+
+    cost_so_far[v] = 0
+    come_from[v] = (v, Directions.STOP)
     while not PQ.isEmpty():
-        tup = PQ.pop()
-        current = tup[0]
-        path = tup[1]
+        current = PQ.pop()
         if problem.isGoalState(current):
+            path = recvPath(come_from, current, v)
             return path
+
         succesors = problem.getSuccessors(current)
         for node in succesors:
-            tmppath = list(path)
             coord = node[0]
-            nextstep = node[1]
+            from_step = node[1]
             weight = node[2]
 
-            if not coord in closed:
-                closed.append(coord)
-                tmppath.append(nextstep)
-                PQ.push((coord, tmppath), weight)
+            newcost = cost_so_far[current] + weight
+            if not coord in cost_so_far or \
+                    newcost < cost_so_far[coord]:
+                come_from[coord] = (current, from_step)
+                cost_so_far[coord] = newcost
+                PQ.push(coord, newcost)
     return []
 
 def nullHeuristic(state, problem=None):
@@ -178,11 +178,11 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-def aStarPath(came_from, current_node, start):
+def recvPath(came_from, current_node, start):
     if start == current_node:
         return []
     if current_node in came_from:
-        path = aStarPath(came_from, came_from[current_node][0], start)
+        path = recvPath(came_from, came_from[current_node][0], start)
         return path + [came_from[current_node][1]]
     else:
         return [came_from[current_node][1]]
@@ -192,25 +192,23 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
     from game import Directions
     PQ = util.PriorityQueue()
-    start = tuple(problem.getStartState())
-    print start
+    start = problem.getStartState()
     PQ.push(start, 0)
     came_from = {}
     cost_so_far = {}
 
-    came_from[start] = [start, Directions.STOP]
+    came_from[start] = (start, Directions.STOP)
     cost_so_far[start] = 0
 
     while not PQ.isEmpty():
         current = PQ.pop()
         if problem.isGoalState(current):
-            path = aStarPath(came_from, current, start)
-            print path
+            path = recvPath(came_from, current, start)
             return path
 
         succesors = problem.getSuccessors(current)
         for node in succesors:
-            coord = tuple(node[0])
+            coord = node[0]
             move = node[1]
             weight = node[2]
             new_cost = cost_so_far[current] + weight
