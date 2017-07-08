@@ -103,6 +103,9 @@ class QLearningAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
+        """
+            In fact, this is epsilon-greed method to do Q-learning.
+        """
         legalActions = self.getLegalActions(state)
         "*** YOUR CODE HERE ***"
         if not legalActions :
