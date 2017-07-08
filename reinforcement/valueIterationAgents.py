@@ -46,6 +46,25 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
 
+        """
+           do iteration, use value iteration to find the optimal solution
+        """
+        for i in range(self.iterations):
+            newValues = self.values.copy()
+            for state in self.mdp.getStates():
+                newValue = float('-inf')
+                if self.mdp.isTerminal(state):
+                    continue
+
+                for action in self.mdp.getPossibleActions(state):
+                    tmpValue = self.computeQValueFromValues(state, action)
+                    if tmpValue > newValue:
+                        newValue = tmpValue
+
+                newValues[state] = newValue
+
+            self.values = newValues
+
 
     def getValue(self, state):
         """
@@ -60,7 +79,14 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        """
+            use Q^* = sum(T(R + gamma * V)) to compute the Q-value
+        """
+        qValue = 0
+        for next_state, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+            qValue += prob * (self.mdp.getReward(state, action, next_state) + self.discount*self.values[next_state])
+
+        return qValue
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +98,22 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        """
+            find the max q_value, and return the relative action 
+        """
+        if self.mdp.isTerminal(state):
+            return None
+        maxValue = float('-inf')
+        bestAction = None
+        for action in self.mdp.getPossibleActions(state):
+            tmpValue = self.computeQValueFromValues(state, action)
+            if tmpValue > maxValue:
+                maxValue = tmpValue
+                bestAction = action
+
+        return bestAction
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
