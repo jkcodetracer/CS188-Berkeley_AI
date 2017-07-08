@@ -91,6 +91,9 @@ class Gridworld(mdp.MarkovDecisionProcess):
         cell = self.grid[x][y]
         if type(cell) == int or type(cell) == float:
             return cell
+        """
+            when step into an empty cell, return the livingReward
+        """
         return self.livingReward
 
     def getStartState(self):
@@ -149,6 +152,9 @@ class Gridworld(mdp.MarkovDecisionProcess):
             successors.append((eastState,massLeft/2.0))
 
         if action == 'west' or action == 'east':
+            """
+                the sum of the neighbour grid, should be 1
+            """
             if action == 'west':
                 successors.append((westState,1-self.noise))
             else:
